@@ -1,40 +1,54 @@
-# Open WebUI + LM Studio (Local) — Docker on WSL2 (NVIDIA GPU)
+# 🚀 Open WebUI + LM Studio (Local) — Docker on WSL2 (NVIDIA GPU)
 **Quick Setup & Troubleshooting Guide**  
 
 
 ## Summary
+Step-by-step instructions to run **Open WebUI** in Docker (WSL2 via Docker Desktop) with **NVIDIA GPU support**, and connect it to a locally hosted **LM Studio** model server. Includes minimal `docker-compose` setup, WSL/Windows networking notes, LAN access configuration, and troubleshooting tips.
 
-Step-by-step instructions to run Open WebUI in Docker (WSL2 via Docker Desktop) with NVIDIA GPU support and connect it to a locally hosted LM Studio model server. Includes minimal docker-compose, WSL/Windows networking notes, LAN access, and troubleshooting tips.
+---
 
 ## Table of Contents
+
 - [Architecture Overview](#architecture-overview)
 - [Prerequisites](#prerequisites)
 - [Configuration & Setup (`docker-compose.yml`)](#configuration-and-setup-docker-composelyml)
 - [Start the Stack](#start-the-stack)
 - [Run LM Studio (Local Model Server)](#run-lm-studio-local-model-server)
 - [Connect Open WebUI to LM Studio](#connect-open-webui-to-lm-studio-two-methods)
-- [Expose to LAN Devices](#expose-open-webui-to-other-devices-on-your-lan)
+- [Expose Open WebUI to Other Devices on Your LAN](#expose-open-webui-to-other-devices-on-your-lan)
 - [Troubleshooting](#common-troubleshooting-symptom-based)
-- [Quick Commands Cheat Sheet](#appendix-useful-commands-copy-paste)
+- [Quick Commands Cheat Sheet](#quick-commands-cheat-sheet)
 - [Security Recommendations](#security-recommendations)
 
 ---
 
-## Architecture Overview
-
-The system relies on **WSL2 integration** to bridge the Windows host environment with Docker containers. Open WebUI runs inside the container, while LM Studio handles model inference locally (either on the Host or within WSL). Communication between them is managed via `host.docker.internal` or standard localhost networking.
-
-
 ## Prerequisites
-- Windows 10/11 with Docker Desktop + WSL2 integration enabled.
-- WSL2 distro (e.g., Ubuntu) with Docker integration enabled in Docker Desktop.
-- NVIDIA GPU with a compatible driver and Docker Desktop GPU support enabled.
-- LM Studio installed and running locally (local model server/API).
-- Basic familiarity with PowerShell and editing files.
+- ✅ Windows 10/11 with Docker Desktop + WSL2 integration enabled.
+- ✅ WSL2 distro (e.g., Ubuntu) with Docker integration enabled in Docker Desktop.
+- ✅ NVIDIA GPU with a compatible driver and Docker Desktop GPU support enabled.
+- ✅ LM Studio installed and running locally (local model server/API).
+- ✅ Basic familiarity with PowerShell and editing files.
 
 ---
 
-## Configuration & Setup (`docker-compose.yml`)
+## Architecture Overview
+```mermaid
+graph TD
+    Win[Windows Host] -->|WSL2 Integration| WSL[WSL2 / Docker Desktop];
+    WSL -->|Docker Network| OW[Open WebUI Container];
+    WSL -->|Localhost/Host.docker.internal| LS[LM Studio Server];
+    OW -.->|API Calls| LS;
+```
+
+---
+
+## Files to Create
+- `docker-compose.yml` — Open WebUI container (CUDA image).
+- *(Optional)* PowerShell script for firewall/port checks.
+
+---
+
+## 1. Configuration (`docker-compose.yml`)
 
 Map host port **8082** → container port **8080**. Use the CUDA image to enable GPU support.
 
@@ -72,7 +86,7 @@ volumes:
 
 ---
 
-## Start the Stack
+## 2. Start the Stack
 
 1. In your project directory, run:
    ```bash
@@ -86,7 +100,7 @@ volumes:
 
 ---
 
-## Run LM Studio (Local Model Server)
+## 3. Run LM Studio (Local Model Server)
 
 1. Start LM Studio and enable its HTTP/REST server.
 2. Note the host/port it uses for the API (e.g., `http://127.0.0.1:11434` or similar).
@@ -97,7 +111,7 @@ volumes:
 
 ---
 
-## Connect Open WebUI to LM Studio (Two Methods)
+## 4. Connect Open WebUI to LM Studio
 
 ### Method A — In-app Configuration (Preferred)
 If Open WebUI supports external model backends:
@@ -110,7 +124,7 @@ If Open WebUI supports external model backends:
 ### Method B — Reverse Proxy (Fallback)
 If direct configuration isn't available, run a lightweight proxy on the Windows host forwarding paths to LM Studio, or configure container DNS to reach `host.docker.internal`.
 
-### Important Container Networking Notes
+### 📡 Important Container Networking Notes
 - **From inside the container**, access Windows-host services via `host.docker.internal`.
 - If LM Studio runs in WSL, the container may reach it via `localhost` or internal network. Test from inside the container:
   ```bash
@@ -119,7 +133,7 @@ If direct configuration isn't available, run a lightweight proxy on the Windows 
 
 ---
 
-## Expose Open WebUI to Other Devices on Your LAN
+## 5. Expose Open WebUI to LAN Devices
 
 To allow other devices on your local network to access Open WebUI:
 
@@ -135,7 +149,7 @@ To allow other devices on your local network to access Open WebUI:
 
 ---
 
-## Common Troubleshooting (Symptom-Based)
+## 🛠 Common Troubleshooting (Symptom-Based)
 
 ### Service works locally but not from other device
 - ✅ Confirm `docker compose ps` shows `0.0.0.0:HOSTPORT->CONTAINERPORT`.
@@ -172,7 +186,7 @@ To allow other devices on your local network to access Open WebUI:
 
 ---
 
-## Quick Commands Cheat Sheet
+## Appendix — Quick Commands Cheat Sheet
 
 | Action | Command |
 | :--- | :--- |
@@ -185,6 +199,6 @@ To allow other devices on your local network to access Open WebUI:
 
 ---
 
-## Security Recommendations
+## 🔒 Security Recommendations
 - ⚠️ Don't expose Open WebUI to the public internet without authentication and TLS.
 - 🛡 Use a reverse proxy with TLS and HTTP auth, or run behind a VPN for remote access.
