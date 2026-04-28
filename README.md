@@ -5,7 +5,6 @@
 ## Summary
 
 Step-by-step instructions to run Open WebUI in Docker (WSL2 via Docker Desktop) with NVIDIA GPU support and connect it to a locally hosted LM Studio model server. Includes minimal docker-compose, WSL/Windows networking notes, LAN access, and troubleshooting tips.
-```
 
 ## Table of Contents
 - [Architecture Overview](#architecture-overview)
