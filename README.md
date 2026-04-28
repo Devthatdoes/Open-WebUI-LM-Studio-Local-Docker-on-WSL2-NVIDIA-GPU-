@@ -22,17 +22,8 @@ Step-by-step instructions to run Open WebUI in Docker (WSL2 via Docker Desktop) 
 
 ## Architecture Overview
 
-```mermaid
-graph TD
-    Win[Windows Host] -->|WSL2 Integration| WSL[WSL2 / Docker Desktop];
-    WSL -->|Docker Network| OW[Open WebUI Container];
-    WSL -->|Localhost/Host.docker.internal| LS[LM Studio Server];
-    OW -.->|API Calls| LS;
-```
+The system relies on **WSL2 integration** to bridge the Windows host environment with Docker containers. Open WebUI runs inside the container, while LM Studio handles model inference locally (either on the Host or within WSL). Communication between them is managed via `host.docker.internal` or standard localhost networking.
 
-The architecture relies on **WSL2 integration** to bridge Windows and Docker. Open WebUI runs inside the container, while LM Studio runs locally on the host (or WSL). Communication between them is handled via `host.docker.internal` or standard localhost networking.
-
----
 
 ## Prerequisites
 - Windows 10/11 with Docker Desktop + WSL2 integration enabled.
