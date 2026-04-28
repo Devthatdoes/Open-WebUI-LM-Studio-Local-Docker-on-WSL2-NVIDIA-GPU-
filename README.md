@@ -2,7 +2,13 @@
 **Quick Setup & Troubleshooting Guide**  
 
 
+## Summary
+
+Step-by-step instructions to run Open WebUI in Docker (WSL2 via Docker Desktop) with NVIDIA GPU support and connect it to a locally hosted LM Studio model server. Includes minimal docker-compose, WSL/Windows networking notes, LAN access, and troubleshooting tips.
+```
+
 ## Table of Contents
+- [Architecture Overview](#architecture-overview)
 - [Prerequisites](#prerequisites)
 - [Configuration & Setup (`docker-compose.yml`)](#configuration-and-setup-docker-composelyml)
 - [Start the Stack](#start-the-stack)
@@ -12,6 +18,20 @@
 - [Troubleshooting](#common-troubleshooting-symptom-based)
 - [Quick Commands Cheat Sheet](#appendix-useful-commands-copy-paste)
 - [Security Recommendations](#security-recommendations)
+
+---
+
+## Architecture Overview
+
+```mermaid
+graph TD
+    Win[Windows Host] -->|WSL2 Integration| WSL[WSL2 / Docker Desktop];
+    WSL -->|Docker Network| OW[Open WebUI Container];
+    WSL -->|Localhost/Host.docker.internal| LS[LM Studio Server];
+    OW -.->|API Calls| LS;
+```
+
+The architecture relies on **WSL2 integration** to bridge Windows and Docker. Open WebUI runs inside the container, while LM Studio runs locally on the host (or WSL). Communication between them is handled via `host.docker.internal` or standard localhost networking.
 
 ---
 
@@ -131,7 +151,7 @@ To allow other devices on your local network to access Open WebUI:
 - ✅ Confirm `docker compose ps` shows `0.0.0.0:HOSTPORT->CONTAINERPORT`.
 - ✅ Confirm Windows firewall rule exists and profiles include the active network.
 - ✅ Confirm Windows network is set to **Private**.
--  **Ping fails?** Enable ICMP inbound:
+- 🚀 **Ping fails?** Enable ICMP inbound:
   ```powershell
   New-NetFirewallRule -Name "Allow-ICMPv4-In" -Protocol ICMPv4 -IcmpType 8 -Action Allow -Direction Inbound -Profile Any
   ```
@@ -146,11 +166,11 @@ To allow other devices on your local network to access Open WebUI:
 
 ### Container not seeing GPU / `nvidia-smi` fails
 - ✅ Ensure NVIDIA driver on Windows is installed and Docker Desktop GPU support enabled.
--  Inside container: `docker exec -it openwebui nvidia-smi`.
--  If it fails, check **Docker Desktop > Settings > Resources > GPU** and WSL integration; restart Docker Desktop.
+- 🔍 Inside container: `docker exec -it openwebui nvidia-smi`.
+- ⚙️ If it fails, check **Docker Desktop > Settings > Resources > GPU** and WSL integration; restart Docker Desktop.
 
 ### Open WebUI cannot reach LM Studio
--  From container, test using curl:
+- 🧪 From container, test using curl:
   ```bash
   docker exec -it openwebui curl -v http://host.docker.internal:<LM_PORT>/health
   ```
